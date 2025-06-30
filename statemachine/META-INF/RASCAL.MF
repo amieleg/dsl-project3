@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-Project-Name: statemachine
-Source: src
-Language: Plugin
-Language-Name: StateMachine
-Language-Extensions: sm
-Require-Libraries: |lib://rascal-lsp/|
