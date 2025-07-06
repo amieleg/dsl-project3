@@ -19,10 +19,10 @@ StatementAST toAST(Statement pt) {
             return \expression(toAST(e));
         case (Statement) `while <Expression e> do <EOL _> <Statement* stats> <EOL _> end <EOL _>`:
             return \while(toAST(e), [toAST(s) | s <- stats]);
+        case (Statement) `if <Expression e> then <EOL _> <Statement* stats> else <EOL _> <Statement* stats_else> end <EOL _>`:
+            return \ifelse(toAST(e), [toAST(s) | s <- stats], [toAST(s) | s <- stats_else]);
         case (Statement) `if <Expression e> then <EOL _> <Statement* stats> end <EOL _>`:
             return \if(toAST(e), [toAST(s) | s <- stats]);
-        case (Statement) `if <Expression e> then <EOL _> <Statement* stats> else <Statement* stats_else> <EOL _> end <EOL _>`:
-            return \ifelse(toAST(e), [toAST(s) | s <- stats], [toAST(s) | s <- stats_else]);
         case (Statement) `output <Expression e>`:
             return \output(toAST(e));
     }

@@ -1,6 +1,0 @@
-Manifest-Version: 0.0.1
-Project-Name: wavy
-Source: src/main/rascal
-Language: Wavy::Main
-Language-Extensions: wavy
-Require-Libraries: |lib://rascal-lsp/|

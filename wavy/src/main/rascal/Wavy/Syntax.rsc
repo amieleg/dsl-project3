@@ -3,7 +3,7 @@ module Wavy::Syntax
 layout Whitespace = [\t\ ]*;
 
 lexical EOL = [\r\n]+;
-lexical Identifier = [A-Za-z][A-Za-z0-9#_]*;
+lexical Identifier = ([A-Za-z][A-Za-z0-9#_]*) \ "else";
 lexical Number = "-"?[0-9]+ ("." [0-9]*)?;
 
 start syntax Wavy = Statement+;
