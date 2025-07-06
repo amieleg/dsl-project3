@@ -3,16 +3,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.tue</groupId>
-  <artifactId>statemachine</artifactId>
-  <version>0.1</version>
-  <packaging>jar</packaging>
+  <groupId>org.rascalmpl</groupId>
+  <artifactId>wavy</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
   </properties>
 
   <repositories>
@@ -68,29 +64,35 @@
     </resources>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.0</version>
+        <configuration>
+          <compilerArgument>-parameters</compilerArgument> 
+          <release>11</release>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.rascalmpl</groupId>
         <artifactId>rascal-maven-plugin</artifactId>
-        <version>0.15.4</version>
+        <version>0.8.2</version>
         <configuration>
           <errorsAsWarnings>true</errorsAsWarnings>
           <bin>${project.build.outputDirectory}</bin>
           <srcs>
-            <src>${project.basedir}/src</src>
+            <src>${project.basedir}/src/main/rascal</src>
           </srcs>
-          <srcIgnores>
-            <ignore>${project.basedir}/src/examples</ignore>
-          </srcIgnores>
           <enableStandardLibrary>false</enableStandardLibrary>
           <mainModule>Plugin</mainModule>
         </configuration>
-        <executions>
-<!--            <execution>
+          <executions>
+            <execution>
               <id>it-compile</id>
               <phase>compile</phase>
               <goals>
                 <goal>compile</goal>
               </goals>
-            </execution>-->
+            </execution>
             <execution>
               <id>it-package</id>
               <phase>prepare-package</phase>
@@ -103,3 +105,4 @@
     </plugins>
   </build>
 </project>
+    
