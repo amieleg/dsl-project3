@@ -10,7 +10,7 @@ start syntax Wavy = Statement+;
 
 syntax Statement
   = loop: "while" Expression "do" EOL Statement* EOL "end" EOL
-  | conditionElse: "if" Expression "then" EOL Statement* "else" Statement EOL "end" EOL
+  | conditionElse: "if" Expression "then" EOL Statement* "else" EOL Statement* "end" EOL
   > condition: "if" Expression "then" EOL Statement* "end" EOL
   | Declaration EOL
   | functionDeclaration: FunctionDeclaration EOL
