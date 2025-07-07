@@ -1,3 +1,4 @@
+A := 440
 C := A * 2^(-9/12)
 C# := A * 2^(-8/12)
 D := A * 2^(-7/12)
@@ -7,7 +8,6 @@ F := A * 2^(-4/12)
 F# := A * 2^(-3/12)
 G := A * 2^(-2/12)
 G# := A * 2^(-1/12)
-A := 440
 A# := A * 2^(1/12)
 B := A * 2^(2/12)
 B# := A * 2^(3/12)
@@ -16,7 +16,7 @@ func C_Chord(t) := Sine(t, C) + Sine(t, E) + Sine(t, G)
 func G_Chord(t) := Sine(t, G) + Sine(t, B) + Sine(t, D)
 
 func Combined(t)
-    if t < 2 then
+    if t < 1 then
         C_Chord(t)
     else
         G_Chord(t)

@@ -1,0 +1,3 @@
+func S(t) := Sine(t, 432)
+
+output S(t)
