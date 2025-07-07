@@ -9,86 +9,11 @@ import List;
 import util::Maybe;
 import Map;
 
-int rate = 4410;
-
-list[int] num_to_4_bytes(int n)
-{
-  int first = n % 256;
-  int second = n / 256;
-  int third = n / (256*256);
-  int fourth = n / (256*256*256);
-
-  return [first, second, third, fourth];
-}
-
-list[int] num_to_2_bytes(int n)
-{
-  int small = n % 256;
-  int big = (n-small)/256;
-  return [small, big];
-}
-
-list[int] get_header(int length)
-{
-  wav_header = [82, 73, 70, 70] + num_to_4_bytes(36 + (length * 4)) + [87, 65, 86, 69, 102, 109, 116, 32, 16, 0, 0, 0, 1, 0, 2, 0] + num_to_4_bytes(rate) + num_to_4_bytes(rate*4) + [4, 0, 16, 0, 100, 97, 116, 97] + num_to_4_bytes(length * 4);
-  return wav_header;
-}
-
-int float_to_sample(real f)
-{
-  int i = round(f * 65535);
-
-  return i;
-}
-
-real sawwave(real x)
-{
-  real tau = 2 * PI();
-  int waven = floor(x / tau);
-  real phase = x - (waven * tau);
-
-  return ((phase / (2 * PI())) * 2) - 1;
-}
-
-real sine(real t, real freq)
-{
-  return 0.5 * sin(2 * PI() * freq * t / rate);
-}
-
-list[int] wave(int length, real freq)
-{
-  samples = [];
-
-  for(int i <- [0..length])
-  {
-    sample = float_to_sample(0.5 * sin(2 * PI() * freq * i / rate));
-    //sample = float_to_sample(0.5 * sawwave(2 * PI() * freq * i / rate));
-    as_2_bytes = num_to_2_bytes(sample);
-    samples += as_2_bytes;
-    samples += as_2_bytes;
-  }
-
-  return samples;
-}
-
-void compileF()
- {
-  seconds = 1;
-  length = seconds * rate;
-  wav = get_header(length);
-
-  for(int i <- [0..10])
-  {
-    wav += wave(floor(0.1 * rate), 800.0 - i * 20);
-  }
-
-  testfile = |project://wavy/src/examples/test.wav|;
-  writeFileBytes(testfile, wav);
-}
-
 map[str, num] VARTABLE = ();
 map[str, tuple[list[str] parameters, list[StatementAST] body]] FUNCTABLE = (("Sine": <["t", "freq"], []>));
+ExpressionAST output_statement;
 
+// args denotes the given parameters
 Maybe[num] eval_func(list[StatementAST] sn, map[str, num] args)
 {
   for(StatementAST s <- sn)
@@ -106,6 +31,7 @@ Maybe[num] eval_func(list[StatementAST] sn, map[str, num] args)
       }
       case \output(ExpressionAST result):
       {
+        output_statement = result;
         return just(eval_expression(result, args));
       }
       case \if(ExpressionAST condition, list[StatementAST] body):
@@ -158,6 +84,7 @@ Maybe[num] eval_func(list[StatementAST] sn, map[str, num] args)
   return nothing();
 }
 
+// evaluate a list of arguments and match the values with their names
 map[str, num] instantiate_args(list[str] parameters, list[ExpressionAST] arguments, map[str, num] args)
 {
   list[num] evaluated_arguments = [];
@@ -173,6 +100,11 @@ map[str, num] instantiate_args(list[str] parameters, list[ExpressionAST] argumen
     outmap += (parameters[i]: evaluated_arguments[i]);
   }
   return outmap;
+}
+
+real sine(real t, real freq)
+{
+  return sin(2 * PI() * freq * t);
 }
 
 num eval_expression(ExpressionAST e, map[str, num] args)
@@ -266,11 +198,9 @@ num eval_expression(ExpressionAST e, map[str, num] args)
     {
       func_info = FUNCTABLE[func];
       call_args = instantiate_args(func_info[0], arguments, args);
-      println(call_args);
 
       if (func == "Sine")
       {
-        println(call_args["freq"]);
         return sine(toReal(call_args["t"]), toReal(call_args["freq"]));
       }
 
@@ -288,24 +218,78 @@ num eval_expression(ExpressionAST e, map[str, num] args)
   return -1;
 }
 
+list[int] num_to_4_bytes(int n)
+{
+  int first = n % 256;
+  int second = n / 256;
+  int third = n / (256*256);
+  int fourth = n / (256*256*256);
+
+  return [first, second, third, fourth];
+}
+
+list[int] num_to_2_bytes(int n)
+{
+  int small = n % 256;
+  int big = (n-small)/256;
+  return [small, big];
+}
+
+list[int] get_header(int length)
+{
+  wav_header = [82, 73, 70, 70] + num_to_4_bytes(36 + (length * 4)) + [87, 65, 86, 69, 102, 109, 116, 32, 16, 0, 0, 0, 1, 0, 2, 0] + num_to_4_bytes(RATE) + num_to_4_bytes(length*4) + [4, 0, 16, 0, 100, 97, 116, 97] + num_to_4_bytes(length * 4);
+  return wav_header;
+}
+
+int float_to_sample(real f)
+{
+  int i = round(f * 65535);
+
+  return i;
+}
+
+// Normalizes to values between -0.5 and 0.5 based on the max of the list
+list[real] normalize(list[real] input)
+{
+  maxval = max(input);
+
+  list[real] outlist = [];
+
+  for (real f <- input)
+  {
+    outlist += 0.5 * (f / maxval);
+  }
+  return outlist;
+}
+
+int RATE = 4410;
+
 void compile(WavyAST ast)
 {
-    list[real] samples = [];
-    for (i <- [0..rate])
+    length = 3;
+    mayberesult0 = eval_func(ast.program,("t": 0));
+    real result0;
+    switch(mayberesult0)
     {
-        result = eval_func(ast.program,("t": i));
-
-        switch(result)
-        {
-            case just(n):
-            {
-                samples += n;
-                
-            }
-        }
+      case just(n):
+      {
+        result0 = n;
+      }
     }
+
+    list[real] samples = [result0];
+    for (i <- [1..length * RATE])
+    {
+      println(i);
+        real t = toReal(i) * (1.0 / RATE);
+        result = eval_expression(output_statement, ("t": t));
+
+        samples += result;
+    }
+
+    samples = normalize(samples);
     
-    wav = get_header(rate);
+    wav = get_header(RATE * length);
 
     for(f <- samples)
     {
@@ -314,6 +298,6 @@ void compile(WavyAST ast)
         wav += as_2_bytes;
     }
 
-    testfile = |project://wavy/texts/test.wav|;
+    testfile = |project://wavy/tests/out.wav|;
     writeFileBytes(testfile, wav);
 }
