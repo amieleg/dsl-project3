@@ -1,0 +1,13 @@
+func Mod(n,s)
+    leftover := n
+    while leftover >= s do
+        leftover := leftover - s
+    end
+    leftover
+end
+
+func Sawwave(t, freq)
+    val := Mod(t,(1 / freq))
+end
+
+output Sawwave(t, 432) 3

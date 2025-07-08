@@ -20,7 +20,7 @@ func Combined(t)
         C_Chord(t)
     else
         G_Chord(t)
-    end
+    end 
 end
 
 output Combined(t) 2

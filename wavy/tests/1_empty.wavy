@@ -9,4 +9,4 @@ end
 
 func TwoTone(freq, amp) := Sine(freq) + Sine(freq*2^(1/12))
 
-output Harmonic([0,1,2],[1, 0.5, 0.5])
+output Harmonic([0,1,2],[1, 0.5, 0.5]) 5

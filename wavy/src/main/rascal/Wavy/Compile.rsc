@@ -274,7 +274,7 @@ int RATE = 4410;
 
 void compile(WavyAST ast)
 {
-    length = 3.0; 
+    length = 1.0; 
     ExpressionAST expr;
 
     if (just(\output(ExpressionAST e, num duration)) := find_output(ast)) {
@@ -287,11 +287,11 @@ void compile(WavyAST ast)
     list[real] samples = [];
     int n_samples = toInt(length * RATE);
 
-    for (i <- [0..n_samples])
+    for (i <- [0..length * RATE])
     {
       println(i);
         real t = toReal(i) * (1.0 / RATE);
-        result = eval_expression(expr, ("t": t));
+        result = toReal(eval_expression(expr, ("t": t)));
 
         samples += result;
     }
