@@ -49,11 +49,13 @@ TENV checkBinaryOp(ExpressionAST lhs, ExpressionAST rhs, TENV env) {
 bool hasReturnExpression(list[StatementAST] block) {
     n_stats = size(block);
     last_idx = n_stats - 1;
+    println(block);
+    println(block[last_idx]);
 
     switch (block[last_idx]) {
-        case \expression(_): true;
-        case \if(cond, body): hasReturnExpression(body);
-        case \ifelse(cond, true_body, false_body): hasReturnExpression(true_body) && hasReturnExpression(false_body);
+        case \expression(_): return true;
+        case \if(_, body): return hasReturnExpression(body);
+        case \ifelse(_, true_body, false_body): return hasReturnExpression(true_body) && hasReturnExpression(false_body);
     }
 
     return false;
