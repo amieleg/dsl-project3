@@ -11,7 +11,6 @@ import Map;
 
 map[str, num] VARTABLE = ();
 map[str, tuple[list[str] parameters, list[StatementAST] body]] FUNCTABLE = (("Sine": <["t", "freq"], []>));
-ExpressionAST output_statement;
 
 Maybe[StatementAST] find_output(WavyAST ast) {
   for (StatementAST stat <- ast.program) {
@@ -41,7 +40,6 @@ Maybe[num] eval_func(list[StatementAST] sn, map[str, num] args)
       }
       case \output(ExpressionAST result, num duration):
       {
-        output_statement = result;
         return just(eval_expression(result, args));
       }
       case \if(ExpressionAST condition, list[StatementAST] body):
@@ -284,24 +282,16 @@ void compile(WavyAST ast)
       expr = e;
     }
 
-    mayberesult0 = eval_func(ast.program,("t": 0));
-    real result0;
-    switch(mayberesult0)
-    {
-      case just(n):
-      {
-        result0 = n;
-      }
-    }
+    firsteval = eval_func(ast.program,("t": 0));
 
-    list[real] samples = [result0];
+    list[real] samples = [];
     int n_samples = toInt(length * RATE);
 
-    for (i <- [1..n_samples])
+    for (i <- [0..n_samples])
     {
       println(i);
         real t = toReal(i) * (1.0 / RATE);
-        result = eval_expression(output_statement, ("t": t));
+        result = eval_expression(expr, ("t": t));
 
         samples += result;
     }
