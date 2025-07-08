@@ -12,6 +12,7 @@ import Wavy::Syntax;
 import Wavy::Parser;
 import Wavy::CST2AST;
 import Wavy::AST;
+import Wavy::Compile;
 
 int main() {
     registerLanguage(language(
@@ -31,8 +32,28 @@ void clearWavy() {
 
 void run() {
     x = parseWavy(|project://wavy/tests/chords.wavy|);
+    ast = loadWavy(x);
+    compile(ast);
+}
 
-    println(x);
+/* Static semantic rules */
+
+data Type = number();
+
+alias TENV = tuple[
+    map[str, Type] symbols,
+    list[str] errors
+];
+
+TENV addError(TENV env, str msg) = env[errors = env.errors + msg];
+
+TENV checkExpr(ExpressionAST e, Type expected, TENV env) {
+    switch (e){
+        case \number(_):
+            expected == number() ? env : addError(env, "Expected number");
+    }
+
+    return env;
 }
 
 bool validAST(WavyAST ast) {

@@ -44,4 +44,4 @@ syntax FunctionDeclaration
       (EOL Statement* "end")
   )
   ;
-syntax Output = "output" Expression;
+syntax Output = "output" Expression Number;

@@ -9,7 +9,7 @@ data StatementAST
     | \while(ExpressionAST condition, list[StatementAST] body)
     | \if(ExpressionAST condition, list[StatementAST] body)
     | \ifelse(ExpressionAST condition, list[StatementAST] true_body, list[StatementAST] false_body)
-    | \output(ExpressionAST result)
+    | \output(ExpressionAST result, num duration)
     ;
 
 data ExpressionAST

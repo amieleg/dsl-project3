@@ -23,4 +23,4 @@ func Combined(t)
     end
 end
 
-output Combined(t)
+output Combined(t) 2

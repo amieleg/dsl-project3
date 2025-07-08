@@ -23,8 +23,8 @@ StatementAST toAST(Statement pt) {
             return \ifelse(toAST(e), [toAST(s) | s <- stats], [toAST(s) | s <- stats_else]);
         case (Statement) `if <Expression e> then <EOL _> <Statement* stats> end <EOL _>`:
             return \if(toAST(e), [toAST(s) | s <- stats]);
-        case (Statement) `output <Expression e>`:
-            return \output(toAST(e));
+        case (Statement) `output <Expression e> <Number n>`:
+            return \output(toAST(e), toReal("<n>"));
     }
 
     throw "Invalid statement parsetree";
