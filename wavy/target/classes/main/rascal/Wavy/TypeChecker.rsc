@@ -4,6 +4,7 @@ import IO;
 import String;
 import ParseTree;
 import List;
+import Map;
 
 import util::LanguageServer;
 import util::IDEServices;
@@ -49,12 +50,10 @@ TENV checkBinaryOp(ExpressionAST lhs, ExpressionAST rhs, TENV env) {
 bool hasReturnExpression(list[StatementAST] block) {
     n_stats = size(block);
     last_idx = n_stats - 1;
-    println(block);
-    println(block[last_idx]);
 
     switch (block[last_idx]) {
         case \expression(_): return true;
-        case \if(_, body): return hasReturnExpression(body);
+        case \if(_, body): hasReturnExpression(body);
         case \ifelse(_, true_body, false_body): return hasReturnExpression(true_body) && hasReturnExpression(false_body);
     }
 
@@ -62,6 +61,8 @@ bool hasReturnExpression(list[StatementAST] block) {
 }
 
 TENV checkProgram(TENV env, WavyAST ast) {
+    env.symbols["t"] = number();
+
     for (stat <- ast.program) {
         env = checkStat(stat, env);
     }
@@ -77,39 +78,54 @@ TENV checkStat(StatementAST s, TENV env) {
 
             return env;
         }
-        case \functionDeclaration(id, _, body): {
+        case \functionDeclaration(id, params, body): {
             env.symbols[id] = func();
+
+            for (p <- params) {
+                env.symbols[p] = number();
+            }
 
             for (stat <- body) {
                 env = checkStat(stat, env);
+            }
+
+            for (p <- params) {
+                if (p != "t") {
+                    env = <delete(env.symbols, p), env.errors>;
+                }
             }
 
             // Check if the last statement of the block is an expression (return value)
-            return hasReturnExpression(body)
+            env = hasReturnExpression(body)
                 ? env
-                : addError(env, "The body is missing a final expression statement to use as return value");
+                : addError(env, "The body is missing an expression statement to use as return value");
+
+            return env;
         }
-        case \expression(expr): checkExpr(expr, number(), env); 
+        case \expression(expr): return checkExpr(expr, number(), env); 
         case \while(cond, body): {
             env = checkExpr(cond, number(), env);
+            og_symbols = env.symbols;
 
             for (stat <- body) {
                 env = checkStat(stat, env);
             }
 
-            return env;
+            return <og_symbols, env.errors>;
         }
         case \if(cond, body): {
             env = checkExpr(cond, number(), env);
+            og_symbols = env.symbols;
 
             for (stat <- body) {
                 env = checkStat(stat, env);
             }
 
-            return env;
+            return <og_symbols, env.errors>;
         }
         case \ifelse(cond, true_body, false_body): {
             env = checkExpr(cond, number(), env);
+            og_symbols = env.symbols;
 
             for (stat <- true_body) {
                 env = checkStat(stat, env);
@@ -118,9 +134,9 @@ TENV checkStat(StatementAST s, TENV env) {
                 env = checkStat(stat, env);
             }
 
-            return env;
+            return <og_symbols, env.errors>;
         }
-        case \output(e, n): checkExpr(e, func(), env);
+        case \output(e, n): return checkExpr(e, func(), env);
     }
 
     return env;
@@ -129,19 +145,19 @@ TENV checkStat(StatementAST s, TENV env) {
 TENV checkExpr(ExpressionAST e, Type expected, TENV env) {
     switch (e) {
         case \number(_):
-            expected == number() ? env : addError(env, "Expected number");
-        case \addition(lhs, rhs): expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
-        case \subtraction(lhs, rhs): expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
-        case \multiplication(lhs, rhs): expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
-        case \division(lhs, rhs): expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
-        case \power(lhs, rhs): expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
-        case \less(lhs, rhs): expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
-        case \lesseq(lhs, rhs): expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
-        case \greater(lhs, rhs): expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
-        case \greatereq(lhs, rhs): expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
-        case \equal(lhs, rhs): expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
-        case \brackets(expr): checkExpr(expr, expected, env);
-        case \number(_): expected == number() ? env : addError(env, "Unexpected number");
+            return expected == number() ? env : addError(env, "Expected number");
+        case \addition(lhs, rhs): return expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
+        case \subtraction(lhs, rhs): return expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
+        case \multiplication(lhs, rhs): return expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
+        case \division(lhs, rhs): return expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
+        case \power(lhs, rhs): return expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
+        case \less(lhs, rhs): return expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
+        case \lesseq(lhs, rhs): return expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
+        case \greater(lhs, rhs): return expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
+        case \greatereq(lhs, rhs): return expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
+        case \equal(lhs, rhs): return expected == number() ? checkBinaryOp(lhs, rhs, env) : addError(env, "Unexpected number");
+        case \brackets(expr): return checkExpr(expr, expected, env);
+        case \number(_): return expected == number() ? env : addError(env, "Unexpected number");
         case \var(id): {
             if (expected != number()) {
                 return addError(env, "Expected " + type2str(expected) + ", but got number");
@@ -158,7 +174,7 @@ TENV checkExpr(ExpressionAST e, Type expected, TENV env) {
             return env;
         }
         case \call(id, args): {
-            if (!(id in env.symbols)) {
+            if (!(id in env.symbols) && id != "Sine") {
                 return addError(env, "Function usage before declaration");
             }
 
