@@ -4,6 +4,10 @@ import Wavy::AST;
 import Wavy::Syntax;
 import IO;
 import String;
+import Type;
+
+import vis::Basic;
+
 
 WavyAST loadWavy((start[Wavy]) `<Statement+ stats>`) {
     return \wavy([toAST(s) | s <- stats]);
@@ -31,20 +35,17 @@ StatementAST toAST(Statement pt) {
 }
 
 public StatementAST toAST((FunctionDeclaration) pt) {
+    println(pt);
     switch (pt) {
-        case (FunctionDeclaration) `func <Identifier id>(<{Identifier ","}* params>) := <Expression e>`:
-            return \functionDeclaration(
-                "<id>",
-                ["<p>" | p <- params],
-                [\expression(toAST(e))]);
-        case (FunctionDeclaration) `func <Identifier id>(<{Identifier ","}* params>) <EOL _> <Statement* body> end`:
+        case (FunctionDeclaration) `func <Identifier id>(<{Identifier ","}* params>) begin <EOL _> <Statement* body> end`: {
             return \functionDeclaration(
                 "<id>",
                 ["<p>" | p <- params],
                 [toAST(b) | b <- body]);
+        }
     }
 
-    throw "Invalid functiondelcaration parsetree";
+    throw "Invalid functiondeclaration parsetree";
 }
 
 public ExpressionAST toAST((Expression) pt) {
@@ -76,8 +77,6 @@ public ExpressionAST toAST((Expression) pt) {
         case (Expression) `<Identifier id>( <{Expression ","}* exprs> )`:
             return \call("<id>", [toAST(e) | e <- exprs]);
     }
-
-    println(pt);
 
     throw "Invalid Expression parsetree";
 }

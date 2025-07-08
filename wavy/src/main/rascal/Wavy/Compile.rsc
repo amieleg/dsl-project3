@@ -285,7 +285,7 @@ void compile(WavyAST ast)
     }
 
     mayberesult0 = eval_func(ast.program,("t": 0));
-    real result0;
+    num result0;
     switch(mayberesult0)
     {
       case just(n):
@@ -294,13 +294,13 @@ void compile(WavyAST ast)
       }
     }
 
-    list[real] samples = [result0];
+    list[num] samples = [result0];
     int n_samples = toInt(length * RATE);
 
     for (i <- [1..n_samples])
     {
       println(i);
-        real t = toReal(i) * (1.0 / RATE);
+        num t = toReal(i) * (1.0 / RATE);
         result = eval_expression(output_statement, ("t": t));
 
         samples += result;

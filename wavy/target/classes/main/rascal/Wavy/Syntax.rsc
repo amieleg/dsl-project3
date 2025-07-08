@@ -22,7 +22,6 @@ syntax Expression
   = Identifier "(" {Expression ","}* ")"
   | Identifier
   | Number
-  | NumberList
   | Identifier "[" Expression "]"
   | bracket "(" Expression ")"
   > right Expression "^" Expression
@@ -35,13 +34,6 @@ syntax Expression
   | left Expression "\<=" Expression 
   ;
 
-syntax NumberList = "[" {Number ","}* "]";
-
 syntax Declaration = Identifier ":=" Expression;
-syntax FunctionDeclaration
-  = "func" Identifier "(" {Identifier ","}* ")" (
-      (":=" Expression) |
-      (EOL Statement* "end")
-  )
-  ;
+syntax FunctionDeclaration = "func" Identifier "(" {Identifier ","}* ")" "begin" EOL Statement* "end";
 syntax Output = "output" Expression Number;

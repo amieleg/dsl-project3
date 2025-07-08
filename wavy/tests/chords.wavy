@@ -12,10 +12,15 @@ A# := A * 2^(1/12)
 B := A * 2^(2/12)
 B# := A * 2^(3/12)
 
-func C_Chord(t) := Sine(t, C) + Sine(t, E) + Sine(t, G)
-func G_Chord(t) := Sine(t, G) + Sine(t, B) + Sine(t, D)
+func C_Chord(t) begin
+    Sine(t, C) + Sine(t, E) + Sine(t, G)
+end
 
-func Combined(t)
+func G_Chord(t) begin
+    Sine(t, G) + Sine(t, B) + Sine(t, D)
+end
+
+func Combined(t) begin
     if t < 1 then
         C_Chord(t)
     else

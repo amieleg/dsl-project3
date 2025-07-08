@@ -24,8 +24,6 @@ data ExpressionAST
     | \greatereq(ExpressionAST lhs, ExpressionAST rhs)
     | \equal(ExpressionAST lhs, ExpressionAST rhs)
     | \brackets(ExpressionAST expr)
-    | \numberlist(list[num] elements)
-    | \listaccess(str list_id, num index)
     | \var(str id)
     | \number(num val)
     | \call(str func, list[ExpressionAST] arguments)

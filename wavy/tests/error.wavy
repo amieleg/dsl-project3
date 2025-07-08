@@ -1,0 +1,12 @@
+func Modulo(t, s) begin
+leftover := t
+while leftover >= s do
+    leftover := leftover - s
+end
+end
+
+func Sawwave(t, freq) begin
+    rest := 5
+end
+
+output Modulo(t, 0.1) 1
